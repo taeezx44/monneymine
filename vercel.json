@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "name": "moneymind",
+  "builds": [
+    {
+      "src": "moneymind-web/package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "moneymind-web/$1"
+    }
+  ]
+}
