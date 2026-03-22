@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MoneyMind — Setup Checklist</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Geist:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0a0b;--bg2:#111113;--bgc:#161618;--b:rgba(255,255,255,.07);--b2:rgba(255,255,255,.13);--t:#e8e6e0;--t2:#c8c6c0;--t3:#888882;--mu:#555550;--fa:#333330;--gr:#84cc16;--gbg:rgba(132,204,22,.1);--gbdr:rgba(132,204,22,.25);--re:#f87171;--am:#fbbf24;--bl:#60a5fa}
+html{background:var(--bg);color:var(--t);font-family:'Geist',sans-serif}
+body{max-width:780px;margin:0 auto;padding:36px 20px 80px}
+.mono{font-family:'Geist Mono',monospace}
+
+h1{font-size:26px;font-weight:500;color:#f5f3ed;margin-bottom:4px}
+.sub{font-size:11px;font-family:'Geist Mono',monospace;color:var(--mu);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:32px}
+
+/* Progress */
+.prog-wrap{margin-bottom:28px}
+.prog-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.prog-label{font-size:12px;font-family:'Geist Mono',monospace;color:var(--t2)}
+.prog-pct{font-size:22px;font-family:'Geist Mono',monospace;font-weight:500;color:var(--gr);letter-spacing:-1px}
+.prog-bg{height:5px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--gr),#a3e635);border-radius:99px;transition:width .4s ease}
+
+/* Alert */
+.alert{background:rgba(248,113,113,.08);border:.5px solid rgba(248,113,113,.25);border-radius:12px;padding:14px 18px;margin-bottom:24px;display:flex;gap:12px;align-items:flex-start}
+.alert-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+.alert-title{font-size:14px;font-weight:500;color:var(--re);margin-bottom:3px}
+.alert-body{font-size:12px;color:var(--t3);line-height:1.6}
+.alert-body a{color:var(--bl);text-decoration:none}
+.alert-body a:hover{text-decoration:underline}
+
+/* Steps */
+.step-section{margin-bottom:20px}
+.step-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.step-num{width:24px;height:24px;border-radius:50%;background:var(--gbg);border:.5px solid var(--gbdr);display:flex;align-items:center;justify-content:center;font-size:11px;font-family:'Geist Mono',monospace;color:var(--gr);flex-shrink:0}
+.step-title{font-size:14px;font-weight:500;color:var(--t2)}
+.step-badge{font-size:10px;font-family:'Geist Mono',monospace;padding:2px 8px;border-radius:99px;background:var(--bgc);color:var(--mu);border:.5px solid var(--b)}
+
+.checks{display:flex;flex-direction:column;gap:6px;padding-left:34px}
+.ci{display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:8px 10px;border-radius:8px;transition:background .1s;user-select:none}
+.ci:hover{background:rgba(255,255,255,.03)}
+.cb{width:17px;height:17px;border-radius:4px;border:1.5px solid var(--b2);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.ci.ok .cb{background:var(--gr);border-color:var(--gr)}
+.ck{font-size:10px;color:#0a0a0b;opacity:0;transition:opacity .15s}
+.ci.ok .ck{opacity:1}
+.ct{font-size:13px;color:var(--t3);line-height:1.5;flex:1}
+.ci.ok .ct{color:var(--mu);text-decoration:line-through}
+.cc{display:block;font-family:'Geist Mono',monospace;font-size:11px;color:var(--fa);margin-top:2px}
+
+/* Code block */
+.code-wrap{padding-left:34px;margin-top:8px}
+.code{background:var(--bgc);border:.5px solid var(--b);border-radius:9px;padding:12px 14px;position:relative}
+.code pre{font-family:'Geist Mono',monospace;font-size:11px;color:var(--t3);line-height:1.8;white-space:pre-wrap;word-break:break-all}
+.code pre .g{color:var(--gr)}.code pre .a{color:var(--am)}.code pre .c{color:var(--fa)}.code pre .b{color:var(--bl)}
+.copy{position:absolute;top:8px;right:8px;padding:3px 9px;background:rgba(255,255,255,.05);border:.5px solid var(--b);border-radius:5px;font-size:10px;font-family:'Geist Mono',monospace;color:var(--mu);cursor:pointer;transition:all .15s}
+.copy:hover{color:var(--t2)}
+.copy.done{color:var(--gr);border-color:var(--gbdr)}
+
+.reset{margin-top:24px;padding:7px 18px;background:transparent;border:.5px solid var(--b);border-radius:7px;color:var(--mu);font-size:11px;font-family:'Geist Mono',monospace;cursor:pointer;transition:all .15s}
+.reset:hover{color:var(--t3);border-color:var(--b2)}
+</style>
+</head>
+<body>
+
+<h1>◈ MoneyMind Setup</h1>
+<div class="sub">Supabase · mdhpjltygrhdpltioqfe</div>
+
+<div class="prog-wrap">
+  <div class="prog-top">
+    <span class="prog-label">Setup Progress</span>
+    <span class="prog-pct" id="pct">0%</span>
+  </div>
+  <div class="prog-bg"><div class="prog-fill" id="fill" style="width:0%"></div></div>
+</div>
+
+<!-- Warning -->
+<div class="alert">
+  <span class="alert-icon">⚠</span>
+  <div>
+    <div class="alert-title">Rotate anon key ก่อนเลย!</div>
+    <div class="alert-body">
+      Key ที่แชร์ใน chat ถูก expose แล้ว ต้อง reset ทันที<br>
+      <a href="https://supabase.com/dashboard/project/mdhpjltygrhdpltioqfe/settings/api" target="_blank">
+        → Supabase Dashboard → Settings → API → Reset anon key
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Step 1: Rotate key -->
+<div class="step-section">
+  <div class="step-header">
+    <div class="step-num">1</div>
+    <div class="step-title">Reset API Keys</div>
+    <span class="step-badge">Supabase Dashboard</span>
+  </div>
+  <div class="checks">
+    <div class="ci" onclick="tick(this)">
+      <div class="cb"><span class="ck">✓</span></div>
+      <div><div class="ct">เปิด Supabase Dashboard → Settings → API</div>
+      <a href="https://supabase.com/dashboard/project/mdhpjltygrhdpltioqfe/settings/api" target="_blank" style="font-size:11px;color:var(--bl)">→ เปิด link นี้</a></div>
+    </div>
+    <div class="ci" onclick="tick(this)">
+      <div class="cb"><span class="ck">✓</span></div>
+      <div><div class="ct">Reset <strong style="color:var(--re)">anon public key</strong> → copy key ใหม่</div></div>
+    </div>
+    <div class="ci" onclick="tick(this)">
+      <div class="cb"><span class="ck">✓</span></div>
+      <div><div class="ct">Copy <strong>service_role key</strong> (ใช้ใน API + Edge Functions)</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Step 2: Schema SQL -->
+<div class="step-section">
+  <div class="step-header">
+    <div class="step-num">2</div>
+    <div class="step-title">รัน schema.sql</div>
+    <span class="step-badge">SQL Editor</span>
+  </div>
+  <div class="checks">
+    <div class="ci" onclick="tick(this)">
+      <div class="cb"><span class="ck">✓</span></div>
+      <div><div class="ct">เปิด SQL Editor ใน Supabase</div>
+      <a href="https://supabase.com/dashboard/project/mdhpjltygrhdpltioqfe/sql/new" target="_blank" style="font-size:11px;color:var(--bl)">→ เปิด SQL Editor</a></div>
+    </div>
+    <div class="ci" onclick="tick(this)">
+      <div class="cb"><span class="ck">✓</span></div>
+      <div><div class="ct">Copy ไฟล์ <code style="color:var(--gr);font-family:'Geist Mono',monospace">outputs/schema.sql</code> ทั้งหมด → วางใน editor → Run</div></div>
+    </div>
+    <div class="ci" onclick="tick(this)">
+      <div class="cb"><span class="ck">✓</span></div>
+      <div><div class="ct">ตรวจสอบว่า tables ถูกสร้างครบ (ควรมี 11 tables)</div>
+      <code class="cc">SELECT tablename FROM pg_tables WHERE schemaname='public';</code></div>
+    </div>
+    <div class="ci" onclick="tick(this)">
+      <div class="cb"><span class="ck">✓</span></div>
+      <div><div class="ct">เพิ่ม subscriptions เข้า Realtime publication</div>
+      <code class="cc">ALTER PUBLICATION supabase_realtime ADD TABLE subscriptions;</code></div>
+    </div>
+  </div>
+</div>
+
+<!-- Step 3: Storage buckets -->
+<div class="step-section">
+  <div class="step-header">
+    <div class="step-num">3</div>
+    <div class="step-title">สร้าง Storage Buckets</div>
+    <span class="step-badge">Storage</span>
+  </div>
+  <div class="checks">
+    <div class="ci" onclick="tick(this)">
+      <div class="cb"><span class="ck">✓</span></div>
+      <div><div class="ct">ไปที่ Storage → New Bucket → สร้าง <code style="color:var(--gr);font-family:'Geist Mono',monospace">receipts</code> (Private)</div>
+      <a href="https://supabase.com/dashboard/project/mdhpjltygrhdpltioqfe/storage/buckets" target="_blank" style="font-size:11px;color:var(--bl)">→ เปิด Storage</a></div>
+    </div>
+    <div class="ci" onclick="tick(this)">
+      <div class="cb"><span class="ck">✓</span></div>
+      <div><div class="ct">สร้าง <code style="color:var(--gr);font-family:'Geist Mono',monospace">avatars</code> (Public) และ <code style="color:var(--gr);font-family:'Geist Mono',monospace">slips</code> (Private)</div></div>
+    </div>
+    <div class="ci" onclick="tick(this)">
+      <div class="cb"><span class="ck">✓</span></div>
+      <div><div class="ct">รัน Storage Policy ใน SQL Editor</div>
+      <code class="cc">CREATE POLICY "receipts: own" ON storage.objects FOR ALL USING (bucket_id='receipts' AND (storage.foldername(name))[1]=auth.uid()::text);</code></div>
+    </div>
+  </div>
+</div>
+
+<!-- Step 4: OAuth providers -->
+<div class="step-section">
+  <div class="step-header">
+    <div class="step-num">4</div>
+    <div class="step-title">ตั้ง OAuth Providers</div>
+    <span class="step-badge">Authentication</span>
+  </div>
+  <div class="checks">
+    <div class="ci" onclick="tick(this)">
+      <div class="cb"><span class="ck">✓</span></div>
+      <div><div class="ct">ไปที่ Authentication → Providers → เปิด Google</div>
+      <a href="https://supabase.com/dashboard/project/mdhpjltygrhdpltioqfe/auth/providers" target="_blank" style="font-size:11px;color:var(--bl)">→ เปิด Providers</a></div>
+    </div>
+    <div class="ci" onclick="tick(this)">
+      <div class="cb"><span class="ck">✓</span></div>
+      <div><div class="ct">ใส่ Google Client ID + Secret (จาก Google Cloud Console)</div>
+      <code class="cc">Callback URL: https://mdhpjltygrhdpltioqfe.supabase.co/auth/v1/callback</code></div>
+    </div>
+    <div class="ci" onclick="tick(this)">
+      <div class="cb"><span class="ck">✓</span></div>
+      <div><div class="ct">เปิด GitHub provider → ใส่ Client ID + Secret</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Step 5: Deploy Edge Functions -->
+<div class="step-section">
+  <div class="step-header">
+    <div class="step-num">5</div>
+    <div class="step-title">Deploy Edge Functions</div>
+    <span class="step-badge">Supabase CLI</span>
+  </div>
+  <div class="checks">
+    <div class="ci" onclick="tick(this)">
+      <div class="cb"><span class="ck">✓</span></div>
+      <div><div class="ct">ติดตั้ง Supabase CLI + login</div>
+      <code class="cc">npm install -g supabase && supabase login</code></div>
+    </div>
+    <div class="ci" onclick="tick(this)">
+      <div class="cb"><span class="ck">✓</span></div>
+      <div><div class="ct">Link project</div>
+      <code class="cc">supabase link --project-ref mdhpjltygrhdpltioqfe</code></div>
+    </div>
+    <div class="ci" onclick="tick(this)">
+      <div class="cb"><span class="ck">✓</span></div>
+      <div><div class="ct">ตั้ง secrets</div>
+      <code class="cc">supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
+supabase secrets set GOOGLE_CLOUD_API_KEY=AIzaSy...</code></div>
+    </div>
+    <div class="ci" onclick="tick(this)">
+      <div class="cb"><span class="ck">✓</span></div>
+      <div><div class="ct">Deploy ทั้ง 3 functions</div>
+      <code class="cc">supabase functions deploy ocr-receipt --no-verify-jwt
+supabase functions deploy ai-financial-chat --no-verify-jwt
+supabase functions deploy verify-slip --no-verify-jwt</code></div>
+    </div>
+  </div>
+</div>
+
+<!-- Step 6: .env files -->
+<div class="step-section">
+  <div class="step-header">
+    <div class="step-num">6</div>
+    <div class="step-title">ตั้ง .env ทุก project</div>
+    <span class="step-badge">Config</span>
+  </div>
+  <div class="checks">
+    <div class="ci" onclick="tick(this)">
+      <div class="cb"><span class="ck">✓</span></div>
+      <div><div class="ct">สร้าง <code style="font-family:'Geist Mono',monospace;color:var(--gr)">moneymind-web/.env.local</code> จากไฟล์ web.env.local</div></div>
+    </div>
+    <div class="ci" onclick="tick(this)">
+      <div class="cb"><span class="ck">✓</span></div>
+      <div><div class="ct">สร้าง <code style="font-family:'Geist Mono',monospace;color:var(--gr)">moneymind-api/.env</code> จากไฟล์ api.env</div></div>
+    </div>
+    <div class="ci" onclick="tick(this)">
+      <div class="cb"><span class="ck">✓</span></div>
+      <div><div class="ct">สร้าง <code style="font-family:'Geist Mono',monospace;color:var(--gr)">moneymind-mobile/.env</code> จากไฟล์ mobile.env</div></div>
+    </div>
+    <div class="ci" onclick="tick(this)">
+      <div class="cb"><span class="ck">✓</span></div>
+      <div><div class="ct">ใส่ key ใหม่ทุกตัวใน .env ทั้ง 3 ไฟล์</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Step 7: Test -->
+<div class="step-section">
+  <div class="step-header">
+    <div class="step-num">7</div>
+    <div class="step-title">ทดสอบ Connection</div>
+    <span class="step-badge">Verify</span>
+  </div>
+  <div class="checks">
+    <div class="ci" onclick="tick(this)">
+      <div class="cb"><span class="ck">✓</span></div>
+      <div><div class="ct">ทดสอบ Supabase connection จาก Next.js</div>
+      <code class="cc">const { data } = await supabase.from('categories').select('*').is('user_id', null)
+console.log(data) // ควรเห็น 12 default categories</code></div>
+    </div>
+    <div class="ci" onclick="tick(this)">
+      <div class="cb"><span class="ck">✓</span></div>
+      <div><div class="ct">ทดสอบ API server</div>
+      <code class="cc">cd moneymind-api && npm run dev
+curl http://localhost:3001/health</code></div>
+    </div>
+    <div class="ci" onclick="tick(this)">
+      <div class="cb"><span class="ck">✓</span></div>
+      <div><div class="ct">ทดสอบ Realtime ใน browser console</div>
+      <code class="cc">// เปิด Dashboard → F12 → Console
+supabase.channel('test').on('postgres_changes',{event:'*',schema:'public',table:'transactions'},console.log).subscribe()</code></div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick copy .env -->
+<div class="code-wrap" style="padding-left:0;margin-top:8px">
+  <div style="font-size:11px;font-family:'Geist Mono',monospace;color:var(--mu);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">DB Connection String (ต้องใส่ password)</div>
+  <div class="code">
+    <button class="copy" onclick="cp(this)">copy</button>
+    <pre><span class="c"># Supabase Pooler (Transaction mode — ใช้กับ Railway)</span>
+DATABASE_URL=postgresql://postgres.mdhpjltygrhdpltioqfe:<span class="a">[DB_PASSWORD]</span>@aws-0-ap-southeast-1.pooler.supabase.com:<span class="g">6543</span>/postgres
+
+<span class="c"># Direct connection (ใช้ตอน migrate)</span>
+DATABASE_URL=postgresql://postgres.mdhpjltygrhdpltioqfe:<span class="a">[DB_PASSWORD]</span>@aws-0-ap-southeast-1.pooler.supabase.com:<span class="g">5432</span>/postgres</pre>
+  </div>
+</div>
+
+<button class="reset" onclick="reset()">↺ Reset checkboxes</button>
+
+<script>
+const K='mm-setup'
+const load=()=>{try{return JSON.parse(localStorage.getItem(K)||'{}')}catch{return{}}}
+const save=s=>localStorage.setItem(K,JSON.stringify(s))
+
+// restore
+const s=load()
+document.querySelectorAll('.ci').forEach((el,i)=>{ if(s[i]) el.classList.add('ok') })
+upd()
+
+function tick(el){
+  el.classList.toggle('ok')
+  const m={}
+  document.querySelectorAll('.ci').forEach((e,i)=>m[i]=e.classList.contains('ok'))
+  save(m); upd()
+}
+function upd(){
+  const all=document.querySelectorAll('.ci').length
+  const done=document.querySelectorAll('.ci.ok').length
+  const p=Math.round(done/all*100)
+  document.getElementById('pct').textContent=p+'%'
+  document.getElementById('fill').style.width=p+'%'
+}
+function reset(){
+  document.querySelectorAll('.ci').forEach(e=>e.classList.remove('ok'))
+  save({}); upd()
+}
+function cp(btn){
+  const txt=btn.nextElementSibling.textContent
+  navigator.clipboard?.writeText(txt).catch(()=>{})
+  btn.textContent='copied!'; btn.classList.add('done')
+  setTimeout(()=>{btn.textContent='copy';btn.classList.remove('done')},2000)
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MoneyMind — Pricing & Upgrade</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Geist+Mono:wght@300;400;500;600&family=Geist:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:    #0a0a0b; --bg2:   #111113; --bg3: #0c0c0e; --bgc: #161618;
+  --b:     rgba(255,255,255,.07); --b2: rgba(255,255,255,.12);
+  --text:  #e8e6e0; --text2: #c8c6c0; --text3: #888882;
+  --muted: #555550; --faint: #333330;
+  --green: #84cc16; --green2: #a3e635;
+  --gbg:   rgba(132,204,22,.10); --gbdr: rgba(132,204,22,.25);
+  --red:   #f87171; --blue: #60a5fa; --amber: #fbbf24;
+}
+html { background: var(--bg); color: var(--text); font-family: 'Geist', sans-serif; }
+body { min-height: 100vh; }
+.mono { font-family: 'Geist Mono', monospace; }
+
+/* ── Page wrapper ── */
+.page { max-width: 960px; margin: 0 auto; padding: 48px 24px 80px; }
+
+/* ── Header ── */
+.page-header { text-align: center; margin-bottom: 48px; }
+.page-label { font-size: 11px; font-family: 'Geist Mono', monospace; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; }
+.page-title { font-family: 'DM Serif Display', serif; font-size: 40px; font-weight: 400; color: #f5f3ed; letter-spacing: -.5px; line-height: 1.1; margin-bottom: 12px; }
+.page-title em { color: var(--green); font-style: italic; }
+.page-sub { font-size: 15px; color: var(--text3); max-width: 420px; margin: 0 auto; line-height: 1.6; }
+
+/* ── Billing toggle ── */
+.billing-toggle { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 36px; }
+.bt-opt { font-size: 13px; font-family: 'Geist Mono', monospace; color: var(--muted); cursor: pointer; transition: color .15s; }
+.bt-opt.active { color: var(--text); }
+.toggle-track { width: 44px; height: 24px; background: var(--bgc); border: .5px solid var(--b2); border-radius: 99px; cursor: pointer; position: relative; transition: background .2s; }
+.toggle-track.annual { background: var(--gbg); border-color: var(--gbdr); }
+.toggle-thumb { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--muted); transition: all .2s; }
+.toggle-track.annual .toggle-thumb { left: 23px; background: var(--green); }
+.save-badge { font-size: 10px; font-family: 'Geist Mono', monospace; color: var(--green); background: var(--gbg); border: .5px solid var(--gbdr); border-radius: 99px; padding: 2px 8px; }
+
+/* ── Plan cards ── */
+.plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 48px; }
+.plan-card {
+  background: var(--bg2); border: .5px solid var(--b); border-radius: 20px;
+  padding: 28px 24px; display: flex; flex-direction: column; gap: 20px;
+  position: relative; overflow: hidden;
+  transition: border-color .2s, transform .2s;
+}
+.plan-card:hover { border-color: var(--b2); transform: translateY(-2px); }
+.plan-card.popular { border-color: var(--gbdr); border-width: 1.5px; }
+.plan-card.popular:hover { border-color: var(--green); }
+
+.popular-ribbon {
+  position: absolute; top: 16px; right: -28px;
+  background: var(--green); color: #0a0a0b;
+  font-size: 10px; font-weight: 500; font-family: 'Geist Mono', monospace;
+  padding: 4px 36px; transform: rotate(35deg);
+  letter-spacing: .5px;
+}
+.plan-card.popular::before {
+  content: ''; position: absolute; inset: 0; border-radius: 18px;
+  background: radial-gradient(circle at top right, rgba(132,204,22,.06) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.plan-top {}
+.plan-name { font-size: 13px; font-family: 'Geist Mono', monospace; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.plan-price-row { display: flex; align-items: baseline; gap: 4px; margin-bottom: 6px; }
+.plan-price { font-size: 36px; font-family: 'Geist Mono', monospace; font-weight: 500; letter-spacing: -2px; }
+.plan-period { font-size: 13px; font-family: 'Geist Mono', monospace; color: var(--muted); }
+.plan-annual-note { font-size: 11px; font-family: 'Geist Mono', monospace; color: var(--muted); min-height: 16px; }
+.plan-desc { font-size: 12px; color: var(--text3); line-height: 1.5; margin-top: 6px; }
+
+.plan-features { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.feat { display: flex; align-items: center; gap: 8px; }
+.feat-icon { width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
+.feat-icon.yes { background: var(--gbg); color: var(--green); }
+.feat-icon.no  { background: rgba(255,255,255,.04); color: var(--faint); }
+.feat-text { font-size: 12px; color: var(--text3); }
+.feat-text.strong { color: var(--text2); }
+.feat-limit { font-size: 10px; font-family: 'Geist Mono', monospace; color: var(--muted); margin-left: auto; }
+
+.plan-btn {
+  padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 500;
+  font-family: 'Geist', sans-serif; cursor: pointer; text-align: center;
+  transition: all .15s; border: none;
+}
+.plan-btn.free-btn  { background: var(--bgc); color: var(--text3); border: .5px solid var(--b); }
+.plan-btn.free-btn:hover { background: rgba(255,255,255,.06); color: var(--text2); }
+.plan-btn.pro-btn   { background: var(--green); color: #0a0a0b; box-shadow: 0 4px 20px rgba(132,204,22,.25); }
+.plan-btn.pro-btn:hover { background: var(--green2); }
+.plan-btn.biz-btn   { background: var(--gbg); color: var(--green); border: .5px solid var(--gbdr); }
+.plan-btn.biz-btn:hover { background: rgba(132,204,22,.16); }
+
+/* ── Current plan indicator ── */
+.current-badge { font-size: 10px; font-family: 'Geist Mono', monospace; color: var(--muted); text-align: center; margin-top: -8px; letter-spacing: .5px; }
+
+/* ── Usage meters ── */
+.usage-section { margin-bottom: 48px; }
+.section-title { font-size: 13px; font-family: 'Geist Mono', monospace; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 16px; }
+.usage-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.usage-card { background: var(--bg2); border: .5px solid var(--b); border-radius: 14px; padding: 18px; }
+.usage-label { font-size: 11px; font-family: 'Geist Mono', monospace; color: var(--muted); letter-spacing: .5px; margin-bottom: 10px; }
+.usage-nums { display: flex; align-items: baseline; gap: 4px; margin-bottom: 8px; }
+.usage-used { font-size: 22px; font-family: 'Geist Mono', monospace; font-weight: 500; color: var(--text); letter-spacing: -1px; }
+.usage-limit { font-size: 13px; font-family: 'Geist Mono', monospace; color: var(--faint); }
+.usage-bar-bg { height: 4px; background: rgba(255,255,255,.06); border-radius: 99px; overflow: hidden; margin-bottom: 6px; }
+.usage-bar-fill { height: 100%; border-radius: 99px; transition: width .5s ease; }
+.usage-reset { font-size: 10px; font-family: 'Geist Mono', monospace; color: var(--faint); }
+
+/* ── Upload modal backdrop ── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.75);
+  backdrop-filter: blur(8px); z-index: 100;
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+  animation: fadeIn .2s ease;
+  opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+.modal {
+  background: var(--bg2); border: .5px solid var(--b2);
+  border-radius: 22px; width: 100%; max-width: 520px;
+  padding: 28px; display: flex; flex-direction: column; gap: 22px;
+  animation: slideUp .25s cubic-bezier(.16,1,.3,1);
+}
+@keyframes slideUp { from{transform:translateY(24px);opacity:0} to{transform:none;opacity:1} }
+
+.modal-header { display: flex; align-items: flex-start; justify-content: space-between; }
+.modal-title { font-family: 'DM Serif Display', serif; font-size: 22px; color: #f5f3ed; line-height: 1.2; }
+.modal-sub { font-size: 12px; font-family: 'Geist Mono', monospace; color: var(--muted); margin-top: 4px; }
+.close-btn { width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,.05); border: .5px solid var(--b); color: var(--text3); font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s; flex-shrink: 0; }
+.close-btn:hover { color: var(--text); background: rgba(255,255,255,.09); }
+
+/* Selected plan summary */
+.plan-summary { background: var(--bgc); border-radius: 12px; border: .5px solid var(--b); padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; }
+.ps-left { display: flex; flex-direction: column; gap: 2px; }
+.ps-plan { font-size: 14px; font-weight: 500; color: var(--text); }
+.ps-period { font-size: 11px; font-family: 'Geist Mono', monospace; color: var(--muted); }
+.ps-price { font-size: 22px; font-family: 'Geist Mono', monospace; font-weight: 500; color: var(--green); letter-spacing: -1px; }
+
+/* Bank info */
+.bank-info { background: rgba(132,204,22,.05); border: .5px solid var(--gbdr); border-radius: 12px; padding: 16px 18px; }
+.bank-title { font-size: 11px; font-family: 'Geist Mono', monospace; color: var(--green); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
+.bank-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.bank-row:last-child { margin-bottom: 0; }
+.bank-key { font-size: 12px; color: var(--muted); }
+.bank-val { font-size: 13px; font-family: 'Geist Mono', monospace; color: var(--text2); display: flex; align-items: center; gap: 6px; }
+.copy-btn { font-size: 10px; background: rgba(255,255,255,.06); border: .5px solid var(--b); border-radius: 5px; padding: 2px 7px; color: var(--text3); cursor: pointer; font-family: 'Geist Mono', monospace; transition: all .15s; }
+.copy-btn:hover { background: rgba(255,255,255,.1); color: var(--text2); }
+.copy-btn.copied { color: var(--green); border-color: var(--gbdr); }
+
+/* Drag drop zone */
+.drop-zone {
+  border: 1px dashed rgba(255,255,255,.15); border-radius: 14px;
+  padding: 32px; text-align: center; cursor: pointer;
+  transition: all .15s;
+}
+.drop-zone:hover, .drop-zone.over { border-color: rgba(132,204,22,.5); background: rgba(132,204,22,.03); }
+.dz-icon { font-size: 32px; color: var(--faint); margin-bottom: 10px; }
+.dz-title { font-size: 14px; color: var(--text2); margin-bottom: 5px; }
+.dz-sub { font-size: 11px; font-family: 'Geist Mono', monospace; color: var(--faint); margin-bottom: 16px; }
+.dz-btns { display: flex; gap: 8px; justify-content: center; }
+.dz-btn { padding: 8px 18px; background: rgba(255,255,255,.05); border: .5px solid var(--b2); border-radius: 8px; color: var(--text3); font-size: 12px; cursor: pointer; transition: all .15s; font-family: 'Geist', sans-serif; }
+.dz-btn:hover { background: rgba(255,255,255,.09); color: var(--text2); }
+
+/* Preview area */
+.slip-preview { display: none; flex-direction: column; gap: 12px; }
+.slip-preview.show { display: flex; }
+.preview-img { width: 100%; max-height: 220px; object-fit: contain; border-radius: 10px; border: .5px solid var(--b); background: var(--bgc); }
+.preview-name { font-size: 11px; font-family: 'Geist Mono', monospace; color: var(--muted); text-align: center; }
+
+/* Progress area */
+.verify-progress { display: none; flex-direction: column; gap: 10px; }
+.verify-progress.show { display: flex; }
+.vp-status { font-size: 13px; font-family: 'Geist Mono', monospace; }
+.vp-status.ok { color: var(--green); }
+.vp-status.thinking { color: var(--amber); }
+.vp-status.err { color: var(--red); }
+.prog-bg { height: 4px; background: rgba(255,255,255,.07); border-radius: 99px; overflow: hidden; }
+.prog-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--green), var(--green2)); transition: width .5s ease; }
+.vp-steps { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.vp-step { font-size: 10px; font-family: 'Geist Mono', monospace; color: var(--faint); transition: color .3s; }
+.vp-step.active { color: var(--green); }
+.vp-step.done   { color: var(--muted); }
+.vp-sep { font-size: 10px; color: var(--faint); }
+
+/* Result */
+.result-box { display: none; flex-direction: column; gap: 12px; }
+.result-box.show { display: flex; }
+.result-header { display: flex; align-items: center; gap: 10px; padding: 16px; border-radius: 12px; }
+.result-header.success { background: rgba(132,204,22,.07); border: .5px solid var(--gbdr); }
+.result-header.fail    { background: rgba(248,113,113,.07); border: .5px solid rgba(248,113,113,.25); }
+.result-icon { font-size: 28px; }
+.result-title { font-size: 16px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+.result-msg { font-size: 12px; color: var(--text3); }
+.result-details { background: var(--bgc); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 8px; border: .5px solid var(--b); }
+.rd-row { display: flex; justify-content: space-between; font-size: 12px; }
+.rd-key { color: var(--muted); font-family: 'Geist Mono', monospace; font-size: 11px; }
+.rd-val { color: var(--text2); font-family: 'Geist Mono', monospace; }
+
+.submit-btn { width: 100%; padding: 13px; background: var(--green); border: none; border-radius: 10px; color: #0a0a0b; font-size: 15px; font-weight: 500; font-family: 'Geist', sans-serif; cursor: pointer; transition: background .15s, transform .1s; }
+.submit-btn:hover { background: var(--green2); }
+.submit-btn:active { transform: scale(.98); }
+.submit-btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="page-label">◈ MoneyMind Pricing</div>
+    <h1 class="page-title">เลือก Plan ที่ <em>ใช่</em> สำหรับคุณ</h1>
+    <p class="page-sub">เริ่มต้นฟรี อัปเกรดเมื่อพร้อม ยืนยันด้วยสลิปโอนเงินอัตโนมัติ</p>
+  </div>
+
+  <!-- Billing toggle -->
+  <div class="billing-toggle">
+    <span class="bt-opt active" id="monthly-label" onclick="setBilling('monthly')">รายเดือน</span>
+    <div class="toggle-track" id="billing-toggle" onclick="toggleBilling()">
+      <div class="toggle-thumb"></div>
+    </div>
+    <span class="bt-opt" id="annual-label" onclick="setBilling('annual')">รายปี</span>
+    <span class="save-badge" id="save-badge">ประหยัด 2 เดือน</span>
+  </div>
+
+  <!-- Plan cards -->
+  <div class="plans">
+
+    <!-- Free -->
+    <div class="plan-card" id="card-free">
+      <div class="plan-top">
+        <div class="plan-name">Free</div>
+        <div class="plan-price-row">
+          <span class="plan-price" style="color:var(--text3)">฿0</span>
+          <span class="plan-period">/เดือน</span>
+        </div>
+        <div class="plan-annual-note"></div>
+        <div class="plan-desc">เริ่มต้นบันทึกรายการได้เลย ไม่ต้องใช้บัตร</div>
+      </div>
+      <div class="plan-features">
+        <div class="feat"><div class="feat-icon yes">✓</div><span class="feat-text">รายการ</span><span class="feat-limit">50/เดือน</span></div>
+        <div class="feat"><div class="feat-icon yes">✓</div><span class="feat-text">AI Chat</span><span class="feat-limit">3/วัน</span></div>
+        <div class="feat"><div class="feat-icon yes">✓</div><span class="feat-text">สแกนสลิป</span><span class="feat-limit">5/เดือน</span></div>
+        <div class="feat"><div class="feat-icon yes">✓</div><span class="feat-text">1 Wallet</span></div>
+        <div class="feat"><div class="feat-icon no">✕</div><span class="feat-text" style="opacity:.5">Budget alerts</span></div>
+        <div class="feat"><div class="feat-icon no">✕</div><span class="feat-text" style="opacity:.5">Analytics โปร</span></div>
+        <div class="feat"><div class="feat-icon no">✕</div><span class="feat-text" style="opacity:.5">CSV Export</span></div>
+      </div>
+      <button class="plan-btn free-btn">ใช้งานฟรีอยู่แล้ว</button>
+      <div class="current-badge">· แผนปัจจุบัน ·</div>
+    </div>
+
+    <!-- Pro -->
+    <div class="plan-card popular" id="card-pro">
+      <div class="popular-ribbon">ยอดนิยม</div>
+      <div class="plan-top">
+        <div class="plan-name" style="color:var(--green)">Pro</div>
+        <div class="plan-price-row">
+          <span class="plan-price" style="color:var(--green)" id="pro-price">฿149</span>
+          <span class="plan-period">/เดือน</span>
+        </div>
+        <div class="plan-annual-note mono" id="pro-annual-note"></div>
+        <div class="plan-desc">สำหรับคนที่จริงจังกับการจัดการเงิน</div>
+      </div>
+      <div class="plan-features">
+        <div class="feat"><div class="feat-icon yes">✓</div><span class="feat-text strong">รายการไม่จำกัด</span></div>
+        <div class="feat"><div class="feat-icon yes">✓</div><span class="feat-text strong">AI Chat</span><span class="feat-limit">50/วัน</span></div>
+        <div class="feat"><div class="feat-icon yes">✓</div><span class="feat-text strong">สแกนสลิปไม่จำกัด</span></div>
+        <div class="feat"><div class="feat-icon yes">✓</div><span class="feat-text strong">5 Wallets</span></div>
+        <div class="feat"><div class="feat-icon yes">✓</div><span class="feat-text strong">Budget alerts</span></div>
+        <div class="feat"><div class="feat-icon yes">✓</div><span class="feat-text strong">Analytics โปร</span></div>
+        <div class="feat"><div class="feat-icon yes">✓</div><span class="feat-text strong">CSV Export (12 เดือน)</span></div>
+      </div>
+      <button class="plan-btn pro-btn" onclick="openUpgrade('pro')">อัปเกรดเป็น Pro →</button>
+    </div>
+
+    <!-- Business -->
+    <div class="plan-card" id="card-biz">
+      <div class="plan-top">
+        <div class="plan-name" style="color:var(--blue)">Business</div>
+        <div class="plan-price-row">
+          <span class="plan-price" style="color:var(--blue)" id="biz-price">฿349</span>
+          <span class="plan-period">/เดือน</span>
+        </div>
+        <div class="plan-annual-note mono" id="biz-annual-note"></div>
+        <div class="plan-desc">สำหรับธุรกิจและทีม ไม่มีข้อจำกัด</div>
+      </div>
+      <div class="plan-features">
+        <div class="feat"><div class="feat-icon yes">✓</div><span class="feat-text strong">ทุกอย่างใน Pro</span></div>
+        <div class="feat"><div class="feat-icon yes">✓</div><span class="feat-text strong">AI Chat ไม่จำกัด</span></div>
+        <div class="feat"><div class="feat-icon yes">✓</div><span class="feat-text strong">Wallets ไม่จำกัด</span></div>
+        <div class="feat"><div class="feat-icon yes">✓</div><span class="feat-text strong">Export ทุกช่วงเวลา</span></div>
+        <div class="feat"><div class="feat-icon yes">✓</div><span class="feat-text strong">Priority support</span></div>
+        <div class="feat"><div class="feat-icon yes">✓</div><span class="feat-text strong">Custom categories ไม่จำกัด</span></div>
+      </div>
+      <button class="plan-btn biz-btn" onclick="openUpgrade('business')">อัปเกรดเป็น Business →</button>
+    </div>
+
+  </div>
+
+  <!-- Usage meters -->
+  <div class="usage-section">
+    <div class="section-title">การใช้งานเดือนนี้</div>
+    <div class="usage-grid">
+      <div class="usage-card">
+        <div class="usage-label">TRANSACTIONS</div>
+        <div class="usage-nums">
+          <span class="usage-used">34</span>
+          <span class="usage-limit">/ 50</span>
+        </div>
+        <div class="usage-bar-bg">
+          <div class="usage-bar-fill" style="width:68%;background:var(--amber)"></div>
+        </div>
+        <div class="usage-reset">reset ใน 9 วัน</div>
+      </div>
+      <div class="usage-card">
+        <div class="usage-label">AI CHAT</div>
+        <div class="usage-nums">
+          <span class="usage-used">2</span>
+          <span class="usage-limit">/ 3 วันนี้</span>
+        </div>
+        <div class="usage-bar-bg">
+          <div class="usage-bar-fill" style="width:66%;background:var(--red)"></div>
+        </div>
+        <div class="usage-reset">reset พรุ่งนี้ 00:00</div>
+      </div>
+      <div class="usage-card">
+        <div class="usage-label">RECEIPT SCANS</div>
+        <div class="usage-nums">
+          <span class="usage-used">3</span>
+          <span class="usage-limit">/ 5</span>
+        </div>
+        <div class="usage-bar-bg">
+          <div class="usage-bar-fill" style="width:60%;background:var(--blue)"></div>
+        </div>
+        <div class="usage-reset">reset ใน 9 วัน</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<!-- ── UPGRADE MODAL ── -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeOnBackdrop(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modal-title">อัปเกรดเป็น Pro</div>
+        <div class="modal-sub" id="modal-sub">ยืนยันด้วยสลิปโอนเงิน — AI ตรวจสอบอัตโนมัติ</div>
+      </div>
+      <button class="close-btn" onclick="closeModal()">✕</button>
+    </div>
+
+    <!-- Stage: choose billing -->
+    <div id="stage-choose">
+      <!-- Plan summary -->
+      <div class="plan-summary" style="margin-bottom:14px">
+        <div class="ps-left">
+          <div class="ps-plan" id="ps-plan-name">Pro Plan</div>
+          <div class="ps-period" id="ps-period">รายเดือน</div>
+        </div>
+        <div class="ps-price" id="ps-price">฿149</div>
+      </div>
+
+      <!-- Billing picker inside modal -->
+      <div style="display:flex;gap:8px;margin-bottom:18px">
+        <button class="plan-btn" id="modal-monthly-btn" onclick="setModalBilling('monthly')"
+          style="flex:1;background:rgba(132,204,22,.1);border:.5px solid rgba(132,204,22,.35);color:var(--green);padding:10px;border-radius:9px;font-family:'Geist Mono',monospace;font-size:12px">
+          รายเดือน<br><span id="modal-monthly-price" style="font-size:16px;font-weight:500">฿149/เดือน</span>
+        </button>
+        <button class="plan-btn" id="modal-annual-btn" onclick="setModalBilling('annual')"
+          style="flex:1;background:var(--bgc);border:.5px solid var(--b);color:var(--text3);padding:10px;border-radius:9px;font-family:'Geist Mono',monospace;font-size:12px">
+          รายปี<br><span id="modal-annual-price" style="font-size:16px;font-weight:500">฿1,490/ปี</span>
+          <div style="font-size:10px;color:var(--green);margin-top:2px">ประหยัด ฿298</div>
+        </button>
+      </div>
+
+      <!-- Bank transfer info -->
+      <div class="bank-info">
+        <div class="bank-title">โอนเงินมาที่</div>
+        <div class="bank-row">
+          <span class="bank-key">ธนาคาร</span>
+          <span class="bank-val">SCB (ไทยพาณิชย์)</span>
+        </div>
+        <div class="bank-row">
+          <span class="bank-key">เลขบัญชี</span>
+          <span class="bank-val">
+            123-456789-0
+            <button class="copy-btn" id="copy-acc" onclick="copyText('123-456789-0','copy-acc')">copy</button>
+          </span>
+        </div>
+        <div class="bank-row">
+          <span class="bank-key">ชื่อบัญชี</span>
+          <span class="bank-val">MoneyMind Co., Ltd.</span>
+        </div>
+        <div class="bank-row">
+          <span class="bank-key">PromptPay</span>
+          <span class="bank-val">
+            0812345678
+            <button class="copy-btn" id="copy-pp" onclick="copyText('0812345678','copy-pp')">copy</button>
+          </span>
+        </div>
+        <div class="bank-row">
+          <span class="bank-key">จำนวนเงิน</span>
+          <span class="bank-val" id="transfer-amount" style="color:var(--green);font-weight:500">฿149</span>
+        </div>
+      </div>
+
+      <button class="submit-btn" onclick="goToUpload()" style="margin-top:4px">
+        โอนเงินแล้ว → อัปโหลดสลิป
+      </button>
+    </div>
+
+    <!-- Stage: upload slip -->
+    <div id="stage-upload" style="display:none">
+      <div id="drop-zone" class="drop-zone"
+        ondragover="event.preventDefault();this.classList.add('over')"
+        ondragleave="this.classList.remove('over')"
+        ondrop="handleDrop(event)"
+        onclick="document.getElementById('slip-file').click()">
+        <div class="dz-icon">⊡</div>
+        <div class="dz-title">วางสลิปโอนเงินที่นี่</div>
+        <div class="dz-sub">JPEG, PNG, WebP · ไม่เกิน 10MB</div>
+        <div class="dz-btns" onclick="event.stopPropagation()">
+          <button class="dz-btn" onclick="document.getElementById('slip-file').click()">📁 เลือกไฟล์</button>
+        </div>
+        <input type="file" id="slip-file" accept="image/*" style="display:none" onchange="handleFileSelect(this)">
+      </div>
+
+      <!-- Preview -->
+      <div class="slip-preview" id="slip-preview">
+        <img id="preview-img" class="preview-img" src="" alt="slip">
+        <div class="preview-name" id="preview-name"></div>
+      </div>
+
+      <!-- Progress -->
+      <div class="verify-progress" id="verify-progress">
+        <div class="vp-status" id="vp-status">⬆ กำลังอัปโหลด...</div>
+        <div class="prog-bg"><div class="prog-fill" id="vp-prog" style="width:0%"></div></div>
+        <div class="vp-steps">
+          <span class="vp-step" id="vs1">Upload</span><span class="vp-sep">→</span>
+          <span class="vp-step" id="vs2">OCR</span><span class="vp-sep">→</span>
+          <span class="vp-step" id="vs3">AI Verify</span><span class="vp-sep">→</span>
+          <span class="vp-step" id="vs4">Activate</span>
+        </div>
+      </div>
+
+      <!-- Result -->
+      <div class="result-box" id="result-box">
+        <div class="result-header" id="result-header">
+          <div class="result-icon" id="result-icon"></div>
+          <div>
+            <div class="result-title" id="result-title"></div>
+            <div class="result-msg" id="result-msg"></div>
+          </div>
+        </div>
+        <div class="result-details" id="result-details" style="display:none">
+          <div class="rd-row"><span class="rd-key">จำนวนเงิน</span><span class="rd-val" id="rd-amount"></span></div>
+          <div class="rd-row"><span class="rd-key">ธนาคาร</span><span class="rd-val" id="rd-bank"></span></div>
+          <div class="rd-row"><span class="rd-key">เลข Ref</span><span class="rd-val" id="rd-ref"></span></div>
+          <div class="rd-row"><span class="rd-key">สถานะ</span><span class="rd-val" style="color:var(--green)">✓ ยืนยันแล้ว</span></div>
+        </div>
+      </div>
+
+      <button class="submit-btn" id="upload-btn" onclick="startVerify()" disabled>
+        ✓ ยืนยันการชำระเงิน
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+let billingMode = 'monthly'
+let selectedPlan = 'pro'
+let modalBillingMode = 'monthly'
+let selectedFile = null
+
+const PRICES = {
+  pro:      { monthly: 149, annual: 1490 },
+  business: { monthly: 349, annual: 3490 },
+}
+
+// ── Billing toggle ──
+function toggleBilling() {
+  setBilling(billingMode === 'monthly' ? 'annual' : 'monthly')
+}
+function setBilling(mode) {
+  billingMode = mode
+  const isAnnual = mode === 'annual'
+  document.getElementById('billing-toggle').classList.toggle('annual', isAnnual)
+  document.getElementById('monthly-label').classList.toggle('active', !isAnnual)
+  document.getElementById('annual-label').classList.toggle('active', isAnnual)
+  document.getElementById('save-badge').style.opacity = isAnnual ? '1' : '0.3'
+  updatePrices()
+}
+function updatePrices() {
+  const isAnnual = billingMode === 'annual'
+  document.getElementById('pro-price').textContent = isAnnual ? '฿124' : '฿149'
+  document.getElementById('pro-annual-note').textContent = isAnnual ? '฿1,490/ปี (ประหยัด ฿298)' : ''
+  document.getElementById('biz-price').textContent = isAnnual ? '฿291' : '฿349'
+  document.getElementById('biz-annual-note').textContent = isAnnual ? '฿3,490/ปี (ประหยัด ฿698)' : ''
+}
+
+// ── Modal ──
+function openUpgrade(plan) {
+  selectedPlan = plan
+  modalBillingMode = billingMode
+  const name = plan === 'pro' ? 'Pro' : 'Business'
+  document.getElementById('modal-title').textContent = `อัปเกรดเป็น ${name}`
+  updateModalPrices()
+  document.getElementById('stage-choose').style.display = 'block'
+  document.getElementById('stage-upload').style.display = 'none'
+  document.getElementById('result-box').classList.remove('show')
+  document.getElementById('modal-overlay').classList.add('open')
+}
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open')
+  selectedFile = null
+}
+function closeOnBackdrop(e) {
+  if (e.target === e.currentTarget) closeModal()
+}
+
+function setModalBilling(mode) {
+  modalBillingMode = mode
+  const mb = document.getElementById('modal-monthly-btn')
+  const ab = document.getElementById('modal-annual-btn')
+  if (mode === 'monthly') {
+    mb.style.background='rgba(132,204,22,.1)'; mb.style.borderColor='rgba(132,204,22,.35)'; mb.style.color='var(--green)'
+    ab.style.background='var(--bgc)'; ab.style.borderColor='var(--b)'; ab.style.color='var(--text3)'
+  } else {
+    ab.style.background='rgba(132,204,22,.1)'; ab.style.borderColor='rgba(132,204,22,.35)'; ab.style.color='var(--green)'
+    mb.style.background='var(--bgc)'; mb.style.borderColor='var(--b)'; mb.style.color='var(--text3)'
+  }
+  updateModalPrices()
+}
+function updateModalPrices() {
+  const p = PRICES[selectedPlan]
+  const isAnnual = modalBillingMode === 'annual'
+  const price = isAnnual ? p.annual : p.monthly
+  const name  = selectedPlan === 'pro' ? 'Pro' : 'Business'
+  document.getElementById('ps-plan-name').textContent = name + ' Plan'
+  document.getElementById('ps-period').textContent    = isAnnual ? 'รายปี' : 'รายเดือน'
+  document.getElementById('ps-price').textContent     = `฿${price.toLocaleString()}`
+  document.getElementById('transfer-amount').textContent = `฿${price.toLocaleString()}`
+  document.getElementById('modal-monthly-price').textContent = `฿${p.monthly}/เดือน`
+  document.getElementById('modal-annual-price').textContent  = `฿${p.annual.toLocaleString()}/ปี`
+}
+
+function copyText(text, btnId) {
+  navigator.clipboard?.writeText(text).catch(()=>{})
+  const btn = document.getElementById(btnId)
+  const orig = btn.textContent
+  btn.textContent = 'copied!'
+  btn.classList.add('copied')
+  setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied') }, 2000)
+}
+
+function goToUpload() {
+  document.getElementById('stage-choose').style.display = 'none'
+  document.getElementById('stage-upload').style.display = 'block'
+}
+
+// ── File handling ──
+function handleFileSelect(input) {
+  const file = input.files?.[0]
+  if (file) showPreview(file)
+}
+function handleDrop(e) {
+  e.preventDefault()
+  document.getElementById('drop-zone').classList.remove('over')
+  const file = e.dataTransfer.files[0]
+  if (file?.type.startsWith('image/')) showPreview(file)
+}
+function showPreview(file) {
+  selectedFile = file
+  const reader = new FileReader()
+  reader.onload = e => {
+    document.getElementById('preview-img').src = e.target.result
+    document.getElementById('preview-name').textContent = file.name
+    document.getElementById('drop-zone').style.display = 'none'
+    document.getElementById('slip-preview').classList.add('show')
+    document.getElementById('upload-btn').disabled = false
+  }
+  reader.readAsDataURL(file)
+}
+
+// ── Verify simulation ──
+async function startVerify() {
+  document.getElementById('upload-btn').disabled = true
+  document.getElementById('slip-preview').classList.remove('show')
+  document.getElementById('verify-progress').classList.add('show')
+
+  const steps = ['vs1','vs2','vs3','vs4']
+  const msgs  = ['⬆ กำลังอัปโหลดสลิป...','◈ Google Vision กำลัง OCR...','✦ Claude AI กำลังตรวจสอบ...','✓ กำลัง Activate...']
+  let p = 0
+
+  for (let i = 0; i < steps.length; i++) {
+    document.getElementById(steps[i]).className = 'vp-step active'
+    document.getElementById('vp-status').className = 'vp-status thinking'
+    document.getElementById('vp-status').textContent = msgs[i]
+
+    const target = (i + 1) * 25
+    while (p < target) {
+      p = Math.min(p + Math.random() * 6 + 2, target)
+      document.getElementById('vp-prog').style.width = p + '%'
+      await sleep(80)
+    }
+    document.getElementById(steps[i]).className = 'vp-step done'
+    if (i < steps.length - 1) await sleep(300)
+  }
+
+  await sleep(400)
+  document.getElementById('verify-progress').classList.remove('show')
+  showResult()
+}
+
+function showResult() {
+  const success = Math.random() > 0.2  // 80% success rate in demo
+  const rb = document.getElementById('result-box')
+  rb.classList.add('show')
+
+  if (success) {
+    document.getElementById('result-header').className = 'result-header success'
+    document.getElementById('result-icon').textContent  = '🎉'
+    document.getElementById('result-title').textContent = 'ยืนยันการชำระเงินสำเร็จ!'
+    document.getElementById('result-msg').textContent   = 'อัปเกรดเป็น ' + (selectedPlan === 'pro' ? 'Pro' : 'Business') + ' เรียบร้อยแล้ว'
+    document.getElementById('result-details').style.display = 'flex'
+    const p = PRICES[selectedPlan]
+    const price = modalBillingMode === 'annual' ? p.annual : p.monthly
+    document.getElementById('rd-amount').textContent = `฿${price.toLocaleString()}`
+    document.getElementById('rd-bank').textContent   = 'SCB / PromptPay'
+    document.getElementById('rd-ref').textContent    = 'REF' + Date.now().toString().slice(-8)
+    document.getElementById('upload-btn').textContent = '✓ ปิด'
+    document.getElementById('upload-btn').disabled    = false
+    document.getElementById('upload-btn').onclick     = closeModal
+  } else {
+    document.getElementById('result-header').className = 'result-header fail'
+    document.getElementById('result-icon').textContent  = '✕'
+    document.getElementById('result-title').textContent = 'ไม่สามารถยืนยันสลิปได้'
+    document.getElementById('result-msg').textContent   = 'จำนวนเงินไม่ตรงกับที่ระบุ กรุณาตรวจสอบและลองอีกครั้ง'
+    document.getElementById('upload-btn').textContent   = '↺ ลองอีกครั้ง'
+    document.getElementById('upload-btn').disabled      = false
+    document.getElementById('upload-btn').onclick       = () => {
+      document.getElementById('result-box').classList.remove('show')
+      document.getElementById('drop-zone').style.display = 'block'
+      document.getElementById('verify-progress').classList.remove('show')
+      document.getElementById('upload-btn').textContent  = '✓ ยืนยันการชำระเงิน'
+      document.getElementById('upload-btn').disabled     = true
+      document.getElementById('upload-btn').onclick      = startVerify
+      selectedFile = null
+    }
+  }
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)) }
+</script>
+</body>
+</html>

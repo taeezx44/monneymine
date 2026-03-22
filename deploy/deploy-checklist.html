@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MoneyMind — Deploy Checklist</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Geist+Mono:wght@300;400;500;600&family=Geist:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0b;--bg2:#111113;--bg3:#0c0c0e;--bgc:#161618;
+  --b:rgba(255,255,255,.07);--b2:rgba(255,255,255,.12);
+  --t:#e8e6e0;--t2:#c8c6c0;--t3:#888882;--mu:#555550;--fa:#333330;
+  --gr:#84cc16;--gr2:#a3e635;--gbg:rgba(132,204,22,.1);--gbdr:rgba(132,204,22,.25);
+  --re:#f87171;--bl:#60a5fa;--am:#fbbf24;
+}
+html{background:var(--bg);color:var(--t);font-family:'Geist',sans-serif;}
+body{max-width:860px;margin:0 auto;padding:40px 24px 80px;}
+.mono{font-family:'Geist Mono',monospace;}
+
+h1{font-family:'DM Serif Display',serif;font-size:32px;font-weight:400;color:#f5f3ed;margin-bottom:6px;}
+.subtitle{font-size:12px;font-family:'Geist Mono',monospace;color:var(--mu);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:40px;}
+
+/* Progress bar */
+.progress-wrap{margin-bottom:32px;}
+.progress-label{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;}
+.progress-title{font-size:13px;font-family:'Geist Mono',monospace;color:var(--t2);}
+.progress-pct{font-size:20px;font-family:'Geist Mono',monospace;font-weight:500;color:var(--gr);letter-spacing:-1px;}
+.progress-bg{height:6px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--gr),var(--gr2));border-radius:99px;transition:width .4s ease;}
+
+/* Service sections */
+.services{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:32px;}
+@media(max-width:600px){.services{grid-template-columns:1fr;}}
+.service-card{background:var(--bg2);border:.5px solid var(--b);border-radius:16px;padding:20px;transition:border-color .2s;}
+.service-card.done{border-color:var(--gbdr);}
+.sc-header{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.sc-icon{font-size:22px;}
+.sc-name{font-size:15px;font-weight:500;color:var(--t);}
+.sc-status{margin-left:auto;font-size:11px;font-family:'Geist Mono',monospace;padding:3px 8px;border-radius:99px;}
+.sc-status.pending{background:rgba(255,255,255,.05);color:var(--mu);}
+.sc-status.partial{background:rgba(251,191,36,.1);color:var(--am);}
+.sc-status.done{background:var(--gbg);color:var(--gr);}
+
+/* Checklist items */
+.checklist{display:flex;flex-direction:column;gap:8px;}
+.check-item{display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:6px 8px;border-radius:8px;transition:background .1s;user-select:none;}
+.check-item:hover{background:rgba(255,255,255,.04);}
+.check-box{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--b2);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.check-item.checked .check-box{background:var(--gr);border-color:var(--gr);}
+.check-mark{font-size:11px;color:#0a0a0b;opacity:0;transition:opacity .15s;}
+.check-item.checked .check-mark{opacity:1;}
+.check-text{font-size:13px;color:var(--t3);line-height:1.4;transition:color .15s;}
+.check-item.checked .check-text{color:var(--mu);text-decoration:line-through;}
+.check-cmd{display:block;font-family:'Geist Mono',monospace;font-size:11px;color:var(--fa);margin-top:2px;transition:color .15s;}
+.check-item.checked .check-cmd{color:var(--faint);}
+
+/* Commands section */
+.cmd-section{margin-bottom:24px;}
+.cmd-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.cmd-title{font-size:12px;font-family:'Geist Mono',monospace;color:var(--mu);letter-spacing:1.2px;text-transform:uppercase;}
+.cmd-badge{font-size:10px;font-family:'Geist Mono',monospace;padding:2px 7px;border-radius:99px;}
+.cmd-badge.railway{background:rgba(96,165,250,.12);color:var(--bl);}
+.cmd-badge.vercel{background:rgba(255,255,255,.06);color:var(--t3);}
+.cmd-badge.eas{background:rgba(167,139,250,.12);color:#a78bfa;}
+.cmd-badge.supabase{background:var(--gbg);color:var(--gr);}
+.cmd-badge.github{background:rgba(255,255,255,.06);color:var(--t3);}
+
+.code-block{background:var(--bg3);border:.5px solid var(--b);border-radius:10px;padding:14px 16px;position:relative;overflow:hidden;}
+.code-block pre{font-family:'Geist Mono',monospace;font-size:12px;color:var(--t3);line-height:1.7;white-space:pre-wrap;word-break:break-all;}
+.code-block pre .kw{color:var(--gr);}
+.code-block pre .str{color:var(--am);}
+.code-block pre .cm{color:var(--fa);}
+.copy-code{position:absolute;top:10px;right:10px;padding:4px 10px;background:rgba(255,255,255,.06);border:.5px solid var(--b);border-radius:6px;font-size:10px;font-family:'Geist Mono',monospace;color:var(--mu);cursor:pointer;transition:all .15s;}
+.copy-code:hover{color:var(--t2);background:rgba(255,255,255,.1);}
+.copy-code.copied{color:var(--gr);border-color:var(--gbdr);}
+
+/* Cost table */
+.cost-table{width:100%;border-collapse:collapse;margin-top:8px;}
+.cost-table th{font-size:10px;font-family:'Geist Mono',monospace;color:var(--mu);letter-spacing:1px;text-transform:uppercase;padding:8px 12px;text-align:left;border-bottom:.5px solid var(--b);}
+.cost-table td{font-size:13px;color:var(--t3);padding:10px 12px;border-bottom:.5px solid rgba(255,255,255,.04);}
+.cost-table tr:last-child td{border-bottom:none;font-weight:500;color:var(--t2);}
+.cost-table td:last-child{text-align:right;font-family:'Geist Mono',monospace;}
+.cost-free{color:var(--gr);}
+.cost-paid{color:var(--am);}
+
+/* Reset button */
+.reset-btn{padding:8px 20px;background:transparent;border:.5px solid var(--b);border-radius:8px;color:var(--mu);font-size:12px;font-family:'Geist Mono',monospace;cursor:pointer;transition:all .15s;margin-top:24px;}
+.reset-btn:hover{border-color:var(--b2);color:var(--t3);}
+</style>
+</head>
+<body>
+
+<h1>◈ Deploy Checklist</h1>
+<div class="subtitle">Railway · Vercel · EAS · Supabase · GitHub Actions</div>
+
+<!-- Overall progress -->
+<div class="progress-wrap">
+  <div class="progress-label">
+    <span class="progress-title">Overall Progress</span>
+    <span class="progress-pct" id="pct">0%</span>
+  </div>
+  <div class="progress-bg">
+    <div class="progress-fill" id="prog-fill" style="width:0%"></div>
+  </div>
+</div>
+
+<!-- Service cards -->
+<div class="services" id="services">
+
+  <!-- Railway -->
+  <div class="service-card" id="card-railway">
+    <div class="sc-header">
+      <span class="sc-icon">🚂</span>
+      <span class="sc-name">Railway — Node.js API</span>
+      <span class="sc-status pending" id="status-railway">pending</span>
+    </div>
+    <div class="checklist">
+      <div class="check-item" onclick="toggle(this,'railway')">
+        <div class="check-box"><span class="check-mark">✓</span></div>
+        <div><div class="check-text">Install Railway CLI</div><code class="check-cmd">npm install -g @railway/cli && railway login</code></div>
+      </div>
+      <div class="check-item" onclick="toggle(this,'railway')">
+        <div class="check-box"><span class="check-mark">✓</span></div>
+        <div><div class="check-text">Init project + add Redis service</div><code class="check-cmd">railway init && railway add --service redis</code></div>
+      </div>
+      <div class="check-item" onclick="toggle(this,'railway')">
+        <div class="check-box"><span class="check-mark">✓</span></div>
+        <div><div class="check-text">Set all environment variables</div><code class="check-cmd">railway variables set NODE_ENV=production ...</code></div>
+      </div>
+      <div class="check-item" onclick="toggle(this,'railway')">
+        <div class="check-box"><span class="check-mark">✓</span></div>
+        <div><div class="check-text">สร้าง railway.json ใน root ของ API</div><code class="check-cmd">{ "build": { "builder": "DOCKERFILE" }, ... }</code></div>
+      </div>
+      <div class="check-item" onclick="toggle(this,'railway')">
+        <div class="check-box"><span class="check-mark">✓</span></div>
+        <div><div class="check-text">Deploy และ test /health endpoint</div><code class="check-cmd">railway up && curl https://api.railway.app/health</code></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vercel -->
+  <div class="service-card" id="card-vercel">
+    <div class="sc-header">
+      <span class="sc-icon">▲</span>
+      <span class="sc-name">Vercel — Next.js Web</span>
+      <span class="sc-status pending" id="status-vercel">pending</span>
+    </div>
+    <div class="checklist">
+      <div class="check-item" onclick="toggle(this,'vercel')">
+        <div class="check-box"><span class="check-mark">✓</span></div>
+        <div><div class="check-text">Install Vercel CLI + login</div><code class="check-cmd">npm install -g vercel && vercel login</code></div>
+      </div>
+      <div class="check-item" onclick="toggle(this,'vercel')">
+        <div class="check-box"><span class="check-mark">✓</span></div>
+        <div><div class="check-text">เพิ่ม vercel.json (framework, region sin1)</div><code class="check-cmd">vercel.json → regions: ["sin1"]</code></div>
+      </div>
+      <div class="check-item" onclick="toggle(this,'vercel')">
+        <div class="check-box"><span class="check-mark">✓</span></div>
+        <div><div class="check-text">Set env vars (SUPABASE_URL, NEXTAUTH_SECRET, etc.)</div><code class="check-cmd">vercel env add NEXT_PUBLIC_SUPABASE_URL</code></div>
+      </div>
+      <div class="check-item" onclick="toggle(this,'vercel')">
+        <div class="check-box"><span class="check-mark">✓</span></div>
+        <div><div class="check-text">Deploy production</div><code class="check-cmd">vercel --prod</code></div>
+      </div>
+      <div class="check-item" onclick="toggle(this,'vercel')">
+        <div class="check-box"><span class="check-mark">✓</span></div>
+        <div><div class="check-text">ทดสอบ login + dashboard</div><code class="check-cmd">open https://moneymind.vercel.app</code></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EAS -->
+  <div class="service-card" id="card-eas">
+    <div class="sc-header">
+      <span class="sc-icon">📱</span>
+      <span class="sc-name">EAS — React Native</span>
+      <span class="sc-status pending" id="status-eas">pending</span>
+    </div>
+    <div class="checklist">
+      <div class="check-item" onclick="toggle(this,'eas')">
+        <div class="check-box"><span class="check-mark">✓</span></div>
+        <div><div class="check-text">Install EAS CLI + login</div><code class="check-cmd">npm install -g eas-cli && eas login</code></div>
+      </div>
+      <div class="check-item" onclick="toggle(this,'eas')">
+        <div class="check-box"><span class="check-mark">✓</span></div>
+        <div><div class="check-text">Init EAS project</div><code class="check-cmd">eas init --id &lt;expo-project-id&gt;</code></div>
+      </div>
+      <div class="check-item" onclick="toggle(this,'eas')">
+        <div class="check-box"><span class="check-mark">✓</span></div>
+        <div><div class="check-text">สร้าง eas.json (development, preview, production)</div><code class="check-cmd">eas.json ตามตัวอย่าง</code></div>
+      </div>
+      <div class="check-item" onclick="toggle(this,'eas')">
+        <div class="check-box"><span class="check-mark">✓</span></div>
+        <div><div class="check-text">Set EAS secrets (Supabase URL, API URL)</div><code class="check-cmd">eas secret:create --scope project --name ...</code></div>
+      </div>
+      <div class="check-item" onclick="toggle(this,'eas')">
+        <div class="check-box"><span class="check-mark">✓</span></div>
+        <div><div class="check-text">Build Android preview APK</div><code class="check-cmd">eas build --platform android --profile preview</code></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase + GitHub -->
+  <div class="service-card" id="card-supabase">
+    <div class="sc-header">
+      <span class="sc-icon">⚡</span>
+      <span class="sc-name">Supabase + CI/CD</span>
+      <span class="sc-status pending" id="status-supabase">pending</span>
+    </div>
+    <div class="checklist">
+      <div class="check-item" onclick="toggle(this,'supabase')">
+        <div class="check-box"><span class="check-mark">✓</span></div>
+        <div><div class="check-text">Set Supabase secrets (Anthropic, Google Vision)</div><code class="check-cmd">supabase secrets set ANTHROPIC_API_KEY=...</code></div>
+      </div>
+      <div class="check-item" onclick="toggle(this,'supabase')">
+        <div class="check-box"><span class="check-mark">✓</span></div>
+        <div><div class="check-text">Deploy 3 Edge Functions</div><code class="check-cmd">supabase functions deploy ocr-receipt ai-financial-chat verify-slip</code></div>
+      </div>
+      <div class="check-item" onclick="toggle(this,'supabase')">
+        <div class="check-box"><span class="check-mark">✓</span></div>
+        <div><div class="check-text">เพิ่ม .github/workflows/deploy.yml</div><code class="check-cmd">ตามไฟล์ deploy.yml ที่สร้างไว้</code></div>
+      </div>
+      <div class="check-item" onclick="toggle(this,'supabase')">
+        <div class="check-box"><span class="check-mark">✓</span></div>
+        <div><div class="check-text">ตั้ง GitHub Secrets ครบ (RAILWAY_TOKEN, VERCEL_TOKEN, etc.)</div><code class="check-cmd">Settings → Secrets → Actions</code></div>
+      </div>
+      <div class="check-item" onclick="toggle(this,'supabase')">
+        <div class="check-box"><span class="check-mark">✓</span></div>
+        <div><div class="check-text">Push to main → ดู Actions run สำเร็จ</div><code class="check-cmd">git push origin main</code></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Quick commands -->
+<div class="cmd-section">
+  <div class="cmd-header">
+    <div class="cmd-title">Quick Deploy Commands</div>
+    <span class="cmd-badge railway">Railway</span>
+  </div>
+  <div class="code-block">
+    <button class="copy-code" onclick="copyBlock(this)">copy</button>
+    <pre><span class="cm"># 1. API → Railway</span>
+<span class="kw">npm install -g</span> @railway/cli
+railway login
+<span class="kw">cd</span> moneymind-api
+railway init
+railway variables <span class="kw">set</span> NODE_ENV=production PORT=3001 API_VERSION=v1
+railway variables <span class="kw">set</span> SUPABASE_URL=<span class="str">"https://xxxx.supabase.co"</span>
+railway variables <span class="kw">set</span> SUPABASE_SERVICE_ROLE_KEY=<span class="str">"eyJ..."</span>
+railway variables <span class="kw">set</span> DATABASE_URL=<span class="str">"postgres://..."</span>
+railway variables <span class="kw">set</span> JWT_SECRET=<span class="str">"$(openssl rand -base64 48)"</span>
+railway variables <span class="kw">set</span> CORS_ORIGINS=<span class="str">"https://moneymind.vercel.app"</span>
+railway up</pre>
+  </div>
+</div>
+
+<div class="cmd-section">
+  <div class="cmd-header">
+    <div class="cmd-title">Quick Deploy Commands</div>
+    <span class="cmd-badge vercel">Vercel</span>
+  </div>
+  <div class="code-block">
+    <button class="copy-code" onclick="copyBlock(this)">copy</button>
+    <pre><span class="cm"># 2. Web → Vercel</span>
+<span class="kw">npm install -g</span> vercel
+vercel login
+<span class="kw">cd</span> moneymind-web
+vercel env add NEXT_PUBLIC_SUPABASE_URL
+vercel env add NEXT_PUBLIC_SUPABASE_ANON_KEY
+vercel env add NEXT_PUBLIC_API_URL
+vercel env add NEXTAUTH_SECRET
+vercel env add NEXTAUTH_URL
+vercel env add GOOGLE_CLIENT_ID
+vercel env add GOOGLE_CLIENT_SECRET
+vercel --prod</pre>
+  </div>
+</div>
+
+<div class="cmd-section">
+  <div class="cmd-header">
+    <div class="cmd-title">Quick Deploy Commands</div>
+    <span class="cmd-badge eas">EAS</span>
+  </div>
+  <div class="code-block">
+    <button class="copy-code" onclick="copyBlock(this)">copy</button>
+    <pre><span class="cm"># 3. Mobile → EAS</span>
+<span class="kw">npm install -g</span> eas-cli
+eas login
+<span class="kw">cd</span> moneymind-mobile
+eas init
+eas secret:create --scope project --name EXPO_PUBLIC_SUPABASE_URL --value <span class="str">"..."</span>
+eas secret:create --scope project --name EXPO_PUBLIC_API_URL --value <span class="str">"..."</span>
+eas build --platform android --profile preview</pre>
+  </div>
+</div>
+
+<div class="cmd-section">
+  <div class="cmd-header">
+    <div class="cmd-title">Quick Deploy Commands</div>
+    <span class="cmd-badge supabase">Supabase</span>
+  </div>
+  <div class="code-block">
+    <button class="copy-code" onclick="copyBlock(this)">copy</button>
+    <pre><span class="cm"># 4. Edge Functions → Supabase</span>
+<span class="kw">npm install -g</span> supabase
+supabase login
+supabase link --project-ref <span class="str">xxxxxxxxxxxxxxxxxxxx</span>
+supabase secrets set ANTHROPIC_API_KEY=<span class="str">sk-ant-...</span>
+supabase secrets set GOOGLE_CLOUD_API_KEY=<span class="str">AIzaSy...</span>
+supabase functions deploy ocr-receipt --no-verify-jwt
+supabase functions deploy ai-financial-chat --no-verify-jwt
+supabase functions deploy verify-slip --no-verify-jwt</pre>
+  </div>
+</div>
+
+<!-- Cost table -->
+<div style="margin-top:32px">
+  <div class="cmd-header">
+    <div class="cmd-title">Infrastructure Cost</div>
+  </div>
+  <div style="background:var(--bg2);border:.5px solid var(--b);border-radius:14px;overflow:hidden">
+    <table class="cost-table">
+      <thead>
+        <tr><th>Service</th><th>Free Tier</th><th>Production / mo</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Railway (API + Redis)</td><td class="cost-free">$5 credit</td><td class="cost-paid">~$15</td></tr>
+        <tr><td>Vercel (Next.js)</td><td class="cost-free">100 GB BW</td><td class="cost-free">Free (Hobby)</td></tr>
+        <tr><td>Supabase (DB + Auth)</td><td class="cost-free">500 MB DB</td><td class="cost-free">Free / $25 Pro</td></tr>
+        <tr><td>EAS Build</td><td class="cost-free">30 builds</td><td class="cost-paid">Free / $99 production</td></tr>
+        <tr><td><strong>Total (dev)</strong></td><td class="cost-free">$0</td><td>—</td></tr>
+        <tr><td><strong>Total (production)</strong></td><td>—</td><td class="cost-paid">~$40-140</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<button class="reset-btn" onclick="resetAll()">↺ Reset all checkboxes</button>
+
+<script>
+const STORE_KEY = 'moneymind-deploy-checklist'
+
+// Load saved state
+function loadState() {
+  try { return JSON.parse(localStorage.getItem(STORE_KEY) || '{}') } catch { return {} }
+}
+function saveState(state) {
+  localStorage.setItem(STORE_KEY, JSON.stringify(state))
+}
+
+// Apply saved state on load
+const saved = loadState()
+document.querySelectorAll('.check-item').forEach((item, i) => {
+  if (saved[i]) item.classList.add('checked')
+})
+updateProgress()
+
+function toggle(item, service) {
+  item.classList.toggle('checked')
+  const allItems = {}
+  document.querySelectorAll('.check-item').forEach((el, i) => {
+    allItems[i] = el.classList.contains('checked')
+  })
+  saveState(allItems)
+  updateProgress()
+  updateServiceStatus(service)
+}
+
+function updateProgress() {
+  const items   = document.querySelectorAll('.check-item')
+  const done    = document.querySelectorAll('.check-item.checked').length
+  const pct     = Math.round((done / items.length) * 100)
+  document.getElementById('pct').textContent = pct + '%'
+  document.getElementById('prog-fill').style.width = pct + '%'
+  ;['railway','vercel','eas','supabase'].forEach(s => updateServiceStatus(s))
+}
+
+function updateServiceStatus(service) {
+  const card  = document.getElementById('card-' + service)
+  const items = card.querySelectorAll('.check-item')
+  const done  = card.querySelectorAll('.check-item.checked').length
+  const badge = document.getElementById('status-' + service)
+  if (!badge) return
+  if (done === 0) {
+    badge.className = 'sc-status pending'; badge.textContent = 'pending'
+    card.classList.remove('done')
+  } else if (done < items.length) {
+    badge.className = 'sc-status partial'; badge.textContent = done + '/' + items.length
+    card.classList.remove('done')
+  } else {
+    badge.className = 'sc-status done'; badge.textContent = 'done ✓'
+    card.classList.add('done')
+  }
+}
+
+function copyBlock(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre')
+  const text = pre.textContent
+  navigator.clipboard?.writeText(text).catch(()=>{})
+  const orig = btn.textContent
+  btn.textContent = 'copied!'
+  btn.classList.add('copied')
+  setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied') }, 2000)
+}
+
+function resetAll() {
+  document.querySelectorAll('.check-item').forEach(el => el.classList.remove('checked'))
+  saveState({})
+  updateProgress()
+}
+</script>
+</body>
+</html>

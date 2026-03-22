@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MoneyMind AI Chat</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Geist+Mono:wght@300;400;500;600&family=Geist:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:     #0a0a0b;
+  --bg2:    #111113;
+  --bg3:    #0c0c0e;
+  --bgc:    #161618;
+  --border: rgba(255,255,255,.07);
+  --brd2:   rgba(255,255,255,.11);
+  --text:   #e8e6e0;
+  --text2:  #c8c6c0;
+  --text3:  #888882;
+  --muted:  #555550;
+  --faint:  #333330;
+  --green:  #84cc16;
+  --green2: #a3e635;
+  --gbg:    rgba(132,204,22,.10);
+  --gbdr:   rgba(132,204,22,.25);
+  --red:    #f87171;
+  --amber:  #fbbf24;
+}
+html,body { height: 100%; }
+body { background: var(--bg); font-family: 'Geist', sans-serif; color: var(--text); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; gap: 20px; }
+
+/* ── Phone shell ── */
+.shell {
+  width: 390px; height: 780px;
+  background: var(--bg);
+  border-radius: 44px;
+  border: 2px solid #1c1c1e;
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  box-shadow: 0 40px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.04);
+  position: relative;
+}
+.notch { height: 44px; background: var(--bg); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.notch-pill { width:120px; height:34px; background:#000; border-radius:99px; }
+
+/* ── Header ── */
+.header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: .5px solid var(--border);
+  flex-shrink: 0;
+}
+.header-center { display:flex; align-items:center; gap:10px; }
+.hav { width:36px; height:36px; border-radius:50%; background:var(--gbg); border:.5px solid var(--gbdr); display:flex; align-items:center; justify-content:center; font-size:14px; color:var(--green); box-shadow: 0 0 12px rgba(132,204,22,.15); }
+.htitle { font-size:15px; font-weight:500; color:#f5f3ed; font-family:'DM Serif Display',serif; }
+.hsub { font-size:10px; font-family:'Geist Mono',monospace; color:var(--muted); margin-top:1px; transition:color .3s; }
+.hsub.thinking { color:var(--green); }
+.icon-btn { width:34px; height:34px; border-radius:8px; background:rgba(255,255,255,.04); border:.5px solid var(--border); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:15px; color:var(--text3); transition:all .15s; }
+.icon-btn:hover { background:rgba(255,255,255,.08); color:var(--text); }
+
+/* ── Messages ── */
+.chat-body {
+  flex:1; overflow-y:auto; padding:16px;
+  display:flex; flex-direction:column; gap:14px;
+  scroll-behavior:smooth;
+}
+.chat-body::-webkit-scrollbar { width:3px; }
+.chat-body::-webkit-scrollbar-thumb { background:rgba(255,255,255,.07); border-radius:99px; }
+
+/* Empty state */
+.empty { display:flex; flex-direction:column; align-items:center; padding:28px 12px 16px; gap:8px; text-align:center; }
+.empty-glyph { font-size:32px; color:var(--green); filter:drop-shadow(0 0 14px rgba(132,204,22,.4)); margin-bottom:2px; }
+.empty-title { font-family:'DM Serif Display',serif; font-size:20px; color:#f5f3ed; }
+.empty-sub { font-size:11px; font-family:'Geist Mono',monospace; color:var(--muted); }
+.prompts { display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-top:14px; width:100%; }
+.prompt-btn {
+  padding:9px 10px; background:var(--bg2); border:.5px solid var(--border);
+  border-radius:10px; font-size:11px; color:var(--text3); cursor:pointer;
+  text-align:left; font-family:'Geist',sans-serif; line-height:1.4;
+  transition:background .15s, border-color .15s;
+}
+.prompt-btn:hover { background:rgba(255,255,255,.05); border-color:rgba(255,255,255,.14); color:var(--text2); }
+
+/* Bubbles */
+.brow { display:flex; gap:8px; align-items:flex-end; animation:pop .2s cubic-bezier(.16,1,.3,1) both; }
+@keyframes pop { from{opacity:0;transform:translateY(8px) scale(.97)} to{opacity:1;transform:none} }
+.brow.user { flex-direction:row-reverse; }
+.bav { width:26px; height:26px; border-radius:50%; background:var(--gbg); border:.5px solid var(--gbdr); display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--green); flex-shrink:0; }
+.bubble { max-width:78%; border-radius:14px; padding:10px 13px; font-size:13px; line-height:1.6; }
+.bubble.ai   { background:var(--bgc); border:.5px solid var(--border); border-bottom-left-radius:3px; color:var(--text2); }
+.bubble.user { background:var(--gbg); border:.5px solid var(--gbdr); border-bottom-right-radius:3px; color:var(--text); }
+.bubble.err  { background:rgba(248,113,113,.08); border-color:rgba(248,113,113,.2); }
+
+/* Typing cursor */
+.cursor { display:inline-block; width:7px; height:13px; background:var(--green); border-radius:2px; margin-left:2px; vertical-align:text-bottom; animation:blink .7s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:.9} 50%{opacity:.15} }
+
+/* Thinking dots */
+.think-row { display:flex; align-items:center; gap:8px; }
+.think-av { width:26px; height:26px; border-radius:50%; background:var(--gbg); border:.5px solid var(--gbdr); display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--green); }
+.think-bubble { display:flex; align-items:center; gap:4px; padding:10px 13px; background:var(--bgc); border:.5px solid var(--border); border-radius:14px 14px 14px 3px; }
+.tdot { width:6px; height:6px; border-radius:50%; background:var(--muted); animation:bounce .8s ease-in-out infinite; }
+.tdot:nth-child(2) { animation-delay:.15s; }
+.tdot:nth-child(3) { animation-delay:.3s; }
+@keyframes bounce { 0%,80%,100%{transform:translateY(0);background:var(--muted)} 40%{transform:translateY(-5px);background:var(--green)} }
+
+/* Follow-ups */
+.follow-bar { padding:6px 12px; border-top:.5px solid var(--border); display:flex; gap:6px; overflow-x:auto; flex-shrink:0; scrollbar-width:none; }
+.follow-bar::-webkit-scrollbar { display:none; }
+.follow-chip { flex-shrink:0; padding:5px 10px; background:rgba(255,255,255,.03); border:.5px solid var(--border); border-radius:99px; font-size:10px; color:var(--text3); cursor:pointer; white-space:nowrap; font-family:'Geist',sans-serif; transition:all .15s; }
+.follow-chip:hover { background:rgba(255,255,255,.07); color:var(--text2); }
+
+/* Input bar */
+.input-bar { display:flex; align-items:flex-end; gap:8px; padding:10px 14px 14px; border-top:.5px solid var(--border); background:var(--bg3); flex-shrink:0; }
+.chat-input {
+  flex:1; background:rgba(255,255,255,.04); border:.5px solid var(--border);
+  border-radius:12px; padding:9px 13px; color:var(--text); font-size:13px;
+  font-family:'Geist',sans-serif; outline:none; resize:none;
+  max-height:100px; line-height:1.5; transition:border-color .15s;
+  scrollbar-width:none;
+}
+.chat-input:focus { border-color:rgba(132,204,22,.4); }
+.chat-input::placeholder { color:var(--faint); }
+.chat-input:disabled { opacity:.5; }
+.send-btn { width:34px; height:34px; border-radius:9px; background:rgba(255,255,255,.05); border:.5px solid var(--border); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px; color:var(--muted); flex-shrink:0; transition:all .15s; }
+.send-btn.active { background:var(--green); color:#0a0a0b; border-color:var(--green); box-shadow:0 0 10px rgba(132,204,22,.3); }
+.send-btn.active:hover { background:var(--green2); }
+.send-btn.stop { background:rgba(248,113,113,.1); color:var(--red); border-color:rgba(248,113,113,.2); }
+
+.footer { font-size:9px; font-family:'Geist Mono',monospace; color:var(--faint); text-align:center; padding:6px 16px 4px; flex-shrink:0; }
+
+/* Context info label */
+.ctx-label { font-size:9px; font-family:'Geist Mono',monospace; color:var(--faint); text-align:center; padding:4px 0; background:rgba(132,204,22,.04); border-bottom:.5px solid rgba(132,204,22,.08); flex-shrink:0; letter-spacing:.3px; }
+</style>
+</head>
+<body>
+
+<div style="text-align:center">
+  <div style="font-family:'DM Serif Display',serif;font-size:24px;color:#f5f3ed">◈ MoneyMind AI Chat</div>
+  <div style="font-size:11px;font-family:'Geist Mono',monospace;color:#555550;margin-top:4px;letter-spacing:1px">STREAMING · FINANCIAL CONTEXT · THAI LANGUAGE</div>
+</div>
+
+<div class="shell">
+  <div class="notch"><div class="notch-pill"></div></div>
+
+  <div class="header">
+    <div class="icon-btn" onclick="resetChat()">‹</div>
+    <div class="header-center">
+      <div class="hav">✦</div>
+      <div>
+        <div class="htitle">MoneyMind AI</div>
+        <div class="hsub" id="status">ผู้ช่วยการเงิน</div>
+      </div>
+    </div>
+    <div class="icon-btn" onclick="resetChat()">↺</div>
+  </div>
+
+  <div class="ctx-label">✦ มีข้อมูลการเงิน ม.ค. 2026 · รายรับ ฿42,500 · รายจ่าย ฿28,340</div>
+
+  <div class="chat-body" id="chat-body">
+    <div id="empty-state">
+      <div class="empty">
+        <div class="empty-glyph">✦</div>
+        <div class="empty-title">MoneyMind AI</div>
+        <div class="empty-sub">ถามอะไรเกี่ยวกับการเงินของคุณก็ได้</div>
+        <div class="prompts">
+          <button class="prompt-btn" onclick="sendMsg('📊 วิเคราะห์การใช้เงินเดือนนี้')">📊 วิเคราะห์การใช้เงินเดือนนี้</button>
+          <button class="prompt-btn" onclick="sendMsg('✂️ ควรลดค่าใช้จ่ายส่วนไหน?')">✂️ ควรลดค่าใช้จ่ายส่วนไหน?</button>
+          <button class="prompt-btn" onclick="sendMsg('🍜 ค่าอาหารของฉันแพงไปไหม?')">🍜 ค่าอาหารแพงไปไหม?</button>
+          <button class="prompt-btn" onclick="sendMsg('💰 ฉันออมได้ดีแค่ไหน?')">💰 ฉันออมได้ดีแค่ไหน?</button>
+          <button class="prompt-btn" onclick="sendMsg('🎯 ตั้งเป้าออม ฿5,000 ทำได้ไหม?')">🎯 ตั้งเป้าออม ฿5,000 เดือนหน้า</button>
+          <button class="prompt-btn" onclick="sendMsg('📈 แนวทางลงทุนเงินเหลือ')">📈 แนวทางลงทุนเงินเหลือ</button>
+        </div>
+      </div>
+    </div>
+    <div id="msg-list"></div>
+  </div>
+
+  <div class="follow-bar" id="follow-bar" style="display:none">
+    <button class="follow-chip" onclick="sendMsg('อธิบายเพิ่มเติม')">อธิบายเพิ่มเติม</button>
+    <button class="follow-chip" onclick="sendMsg('ให้คำแนะนำที่เป็น step-by-step')">Step-by-step</button>
+    <button class="follow-chip" onclick="sendMsg('เดือนหน้าควรทำอย่างไร?')">เดือนหน้า</button>
+    <button class="follow-chip" onclick="sendMsg('เปรียบเทียบกับเดือนที่แล้ว')">เปรียบเทียบ</button>
+  </div>
+
+  <div class="input-bar">
+    <textarea class="chat-input" id="chat-input" rows="1" placeholder="ถามเกี่ยวกับการเงิน..."></textarea>
+    <div class="send-btn" id="send-btn" onclick="handleSend()">↑</div>
+  </div>
+
+  <div class="footer">ข้อมูลจาก MoneyMind · AI อาจผิดพลาดได้ ตรวจสอบก่อนตัดสินใจเสมอ</div>
+</div>
+
+<script>
+const FINANCIAL_CONTEXT = `ข้อมูลการเงินของ user เดือน ม.ค. 2026:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+รายรับ:  ฿42,500
+รายจ่าย: ฿28,340
+ออม:      ฿14,160 (33%)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+หมวดจ่ายสูงสุด:
+  อาหาร:    ฿11,900 (42%) ⚠️ เกินงบ (งบ ฿8,000)
+  บิล:       ฿6,200  (22%)
+  ช้อปปิ้ง: ฿4,800  (17%)
+  เดินทาง:  ฿2,400  (8%)
+  บันเทิง:  ฿1,240  (4%)
+
+⚠️ เกินงบประมาณ:
+  อาหาร: ใช้ 149% (฿11,900 / ฿8,000)
+
+รายการล่าสุด:
+  -฿65 — ข้าวมันไก่ประตูน้ำ (อาหาร) วันนี้
+  -฿120 — Grab (เดินทาง) วันนี้
+  +฿21,250 — เงินเดือน (เงินเดือน) เมื่อวาน
+  -฿1,240 — Villa Market (ช้อปปิ้ง) เมื่อวาน
+  -฿279 — Netflix (บันเทิง) 15 ม.ค.`
+
+const SYSTEM_PROMPT = `คุณคือ MoneyMind AI — ผู้ช่วยการเงินส่วนตัวที่เชี่ยวชาญ ตอบเป็นภาษาไทย
+
+บุคลิก: ฉลาด เป็นมิตร ตรงไปตรงมา ให้คำแนะนำที่ actionable ไม่พูดวนเวียน
+
+${FINANCIAL_CONTEXT}
+
+กฎการตอบ:
+- ใช้ตัวเลขจริงจาก context ด้านบน
+- ถ้าถามเรื่องลดค่าใช้จ่าย → ระบุหมวดที่เกินงบก่อน
+- ให้คำแนะนำเป็นข้อ bullet ชัดเจน actionable
+- ไม่เกิน 3 ย่อหน้า เว้นแต่ user ขอรายละเอียด
+- ใช้ emoji น้อยๆ เสริม ไม่มากเกินไป
+- ตอบภาษาไทยเสมอ`
+
+let history = []
+let isStreaming = false
+let abortCtrl = null
+
+function makeId() { return Math.random().toString(36).slice(2,9) }
+
+const chatInput = document.getElementById('chat-input')
+const sendBtn   = document.getElementById('send-btn')
+const chatBody  = document.getElementById('chat-body')
+const msgList   = document.getElementById('msg-list')
+const followBar = document.getElementById('follow-bar')
+const statusEl  = document.getElementById('status')
+
+chatInput.addEventListener('input', () => {
+  chatInput.style.height = 'auto'
+  chatInput.style.height = Math.min(chatInput.scrollHeight, 100) + 'px'
+  updateSendBtn()
+})
+chatInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() }
+})
+
+function updateSendBtn() {
+  const hasText = chatInput.value.trim().length > 0
+  if (isStreaming) {
+    sendBtn.className = 'send-btn stop'
+    sendBtn.textContent = '◼'
+  } else {
+    sendBtn.className = 'send-btn' + (hasText ? ' active' : '')
+    sendBtn.textContent = '↑'
+  }
+}
+
+function handleSend() {
+  if (isStreaming) { stopStream(); return }
+  const text = chatInput.value.trim()
+  if (!text) return
+  sendMsg(text)
+}
+
+async function sendMsg(text) {
+  if (isStreaming) return
+  document.getElementById('empty-state').style.display = 'none'
+
+  chatInput.value = ''
+  chatInput.style.height = 'auto'
+  followBar.style.display = 'none'
+
+  // User bubble
+  const userEl = addBubble('user', text)
+  history.push({ role: 'user', content: text })
+
+  // AI bubble (pending)
+  const asstId = makeId()
+  const asstEl = addBubble('ai', '', true, asstId)
+  scrollToBottom()
+
+  isStreaming = true
+  updateSendBtn()
+  statusEl.textContent = 'กำลังคิด...'
+  statusEl.className = 'hsub thinking'
+
+  abortCtrl = new AbortController()
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type':      'application/json',
+        'x-api-key':         'DEMO_MODE',   // replace with actual key in production
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model:      'claude-sonnet-4-20250514',
+        max_tokens: 1024,
+        system:     SYSTEM_PROMPT,
+        stream:     true,
+        messages:   history,
+      }),
+      signal: abortCtrl.signal,
+    })
+
+    // If no API key / CORS → fall back to demo response
+    if (!res.ok) throw new Error('demo')
+
+    const reader  = res.body.getReader()
+    const decoder = new TextDecoder()
+    let   buffer  = ''
+    let   accum   = ''
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      buffer += decoder.decode(value, { stream: true })
+      const lines = buffer.split('\n')
+      buffer = lines.pop() ?? ''
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue
+        const data = line.slice(6).trim()
+        if (data === '[DONE]') continue
+        try {
+          const evt = JSON.parse(data)
+          if (evt.type === 'content_block_delta' && evt.delta?.type === 'text_delta') {
+            accum += evt.delta.text ?? ''
+            updateBubble(asstId, accum, true)
+            scrollToBottom()
+          }
+        } catch {}
+      }
+    }
+    finishBubble(asstId, accum)
+    history.push({ role: 'assistant', content: accum })
+
+  } catch (err) {
+    if (err.name === 'AbortError') { finishBubble(asstId, '(หยุด)'); return }
+
+    // Demo mode: simulate streaming with fake response
+    await simulateStream(asstId, text)
+  } finally {
+    isStreaming = false
+    updateSendBtn()
+    statusEl.textContent = 'ผู้ช่วยการเงิน'
+    statusEl.className = 'hsub'
+    followBar.style.display = 'flex'
+  }
+}
+
+// Demo streaming simulation
+async function simulateStream(asstId, userText) {
+  const responses = {
+    default: `จากข้อมูลการเงินของคุณเดือน ม.ค. 2026 มีประเด็นที่น่าสนใจดังนี้\n\n**สรุปภาพรวม**\n- รายรับ ฿42,500 / รายจ่าย ฿28,340 → ออมได้ ฿14,160 (33%)\n- อัตราออม 33% ถือว่าดีมาก เกินกว่าค่าเฉลี่ยที่แนะนำ (20%)\n\n**จุดที่ต้องระวัง**\n- 🍜 ค่าอาหาร ฿11,900 เกินงบ ฿8,000 ไปถึง **149%** นี่คือปัญหาหลัก\n- ลองลดมื้อนอกบ้าน 3-4 มื้อ/สัปดาห์ จะประหยัดได้ประมาณ ฿2,000-3,000/เดือน`,
+    food:    `ค่าอาหารของคุณเดือนนี้อยู่ที่ **฿11,900** ซึ่ง **เกินงบที่ตั้งไว้ ฿8,000 ถึง 49%** นับว่าสูงมากทีเดียว\n\n**สาเหตุที่เป็นไปได้**\n- กิน delivery บ่อยกว่าปกติ (Grab Food มักแพงกว่าไปกินเองประมาณ 30-40%)\n- มื้อนอกบ้านในช่วงสัปดาห์\n\n**คำแนะนำลด 3 ข้อ**\n- ลด delivery เหลือ 2 ครั้ง/สัปดาห์ → ประหยัด ~฿1,200\n- ทำอาหารกลางวันไปกิน 3 วัน/สัปดาห์ → ประหยัด ~฿800\n- ตั้งงบอาหารใหม่เป็น ฿10,000 (เป็นจริงกว่าเดิม)`,
+    save:    `อัตราออมของคุณเดือนนี้อยู่ที่ **33%** (฿14,160 / ฿42,500) ซึ่งถือว่า **ดีมาก** เกินกว่า rule of thumb 20% อยู่มาก\n\n**เปรียบเทียบ**\n- Rule of 50/30/20: ควรออมอย่างน้อย 20%\n- คุณออมได้ 33% → top 15% ของคนไทยในวัยเดียวกัน\n\n**ข้อแนะนำ**\n- เงิน ฿14,160 นี้ แบ่งสัดส่วน: 50% กองฉุกเฉิน + 50% ลงทุน\n- ถ้ากองฉุกเฉินครบ 3-6 เดือน (฿85k-170k) แล้ว → ลงทุนทั้งหมด`,
+  }
+  const key = userText.includes('อาหาร') ? 'food' : userText.includes('ออม') ? 'save' : 'default'
+  const full = responses[key]
+
+  let i = 0
+  while (i < full.length) {
+    if (abortCtrl?.signal.aborted) break
+    const chunk = full.slice(i, i + Math.ceil(Math.random() * 4 + 1))
+    i += chunk.length
+    const current = full.slice(0, i)
+    updateBubble(asstId, current, i < full.length)
+    scrollToBottom()
+    await sleep(18 + Math.random() * 25)
+  }
+  finishBubble(asstId, full)
+  history.push({ role: 'assistant', content: full })
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)) }
+
+function addBubble(role, text, pending=false, id=null) {
+  const row = document.createElement('div')
+  row.className = `brow ${role}`
+  if (id) row.id = `bubble-${id}`
+
+  if (role === 'ai') {
+    const av = document.createElement('div')
+    av.className = 'bav'; av.textContent = '✦'
+    row.appendChild(av)
+  }
+
+  const bub = document.createElement('div')
+  bub.className = `bubble ${role}`
+
+  if (pending && !text) {
+    // Show thinking dots
+    bub.innerHTML = `<div class="think-bubble"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div>`
+    bub.style.background = 'transparent'; bub.style.border = 'none'; bub.style.padding = '0'
+  } else {
+    bub.innerHTML = renderMd(text)
+    if (pending) bub.innerHTML += '<span class="cursor"></span>'
+  }
+
+  row.appendChild(bub)
+  msgList.appendChild(row)
+  return row
+}
+
+function updateBubble(id, text, pending) {
+  const row = document.getElementById(`bubble-${id}`)
+  if (!row) return
+  const bub = row.querySelector('.bubble')
+  bub.style.background = ''; bub.style.border = ''; bub.style.padding = ''
+  bub.innerHTML = renderMd(text) + (pending ? '<span class="cursor"></span>' : '')
+}
+
+function finishBubble(id, text) {
+  const row = document.getElementById(`bubble-${id}`)
+  if (!row) return
+  const bub = row.querySelector('.bubble')
+  bub.style.background = ''; bub.style.border = ''; bub.style.padding = ''
+  bub.innerHTML = renderMd(text)
+}
+
+function renderMd(text) {
+  return text
+    .split('\n')
+    .map(line => {
+      const isBullet = /^[-•*]\s/.test(line) || /^\d+\.\s/.test(line)
+      const bold = line.replace(/\*\*([^*]+)\*\*/g, '<strong style="color:#f5f3ed;font-weight:500">$1</strong>')
+      if (isBullet) return `<div style="padding-left:14px;position:relative;margin:2px 0"><span style="position:absolute;left:0;color:#84cc16">·</span>${bold}</div>`
+      return `<div style="margin-top:6px">${bold}</div>`
+    })
+    .join('')
+}
+
+function scrollToBottom() {
+  setTimeout(() => chatBody.scrollTop = chatBody.scrollHeight, 50)
+}
+
+function stopStream() {
+  abortCtrl?.abort()
+  isStreaming = false
+  updateSendBtn()
+  statusEl.textContent = 'ผู้ช่วยการเงิน'
+  statusEl.className = 'hsub'
+}
+
+function resetChat() {
+  stopStream()
+  history = []
+  msgList.innerHTML = ''
+  document.getElementById('empty-state').style.display = 'block'
+  followBar.style.display = 'none'
+}
+</script>
+</body>
+</html>
